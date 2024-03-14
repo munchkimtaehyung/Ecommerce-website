@@ -1,0 +1,199 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Product {
+    private int id;
+    private String name;
+    private double price;
+
+    public Product(int id, String name, double price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+}
+
+class ShoppingCart {
+    private List<Product> items;
+
+    public ShoppingCart() {
+        this.items = new ArrayList<>();
+    }
+
+    public void addItem(Product product) {
+        items.add(product);
+    }
+
+    public void removeItem(Product product) {
+        items.remove(product);
+    }
+
+    public List<Product> getItems() {
+        return items;
+    }
+
+    public double calculateTotal() {
+        double total = 0;
+        for (Product item : items) {
+            total += item.getPrice();
+        }
+        return total;
+    }
+}
+
+class User {
+    private String username;
+    private String password;
+    private ShoppingCart cart;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+        this.cart = new ShoppingCart();
+    }
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public ShoppingCart getCart() {
+        return cart;
+    }
+}
+
+public class Main {
+    private static List<Product> products = new ArrayList<>();
+    private static List<User> users = new ArrayList<>();
+    private static User currentUser;
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        products.add(new Product(1, "Laptop", 999.99));
+        products.add(new Product(2, "Phone", 499.99));
+        products.add(new Product(3, "Headphones", 99.99));
+
+        users.add(new User("user1", "password1"));
+        users.add(new User("user2", "password2"));
+
+        boolean running = true;
+        while (running) {
+            System.out.println("\nWelcome to E-commerce System");
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. View Products");
+            System.out.println("4. Add to Cart");
+            System.out.println("5. View Cart");
+            System.out.println("6. Exit");
+
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter username: ");
+                    String regUsername = scanner.nextLine();
+                    System.out.print("Enter password: ");
+                    String regPassword = scanner.nextLine();
+                    users.add(new User(regUsername, regPassword));
+                    System.out.println("Registration successful!");
+                    break;
+                case 2:
+                    System.out.print("Enter username: ");
+                    String loginUsername = scanner.nextLine();
+                    System.out.print("Enter password: ");
+                    String loginPassword = scanner.nextLine();
+                    currentUser = login(loginUsername, loginPassword);
+                    break;
+                case 3:
+                    displayProducts();
+                    break;
+                case 4:
+                    if (currentUser != null) {
+                        System.out.print("Enter product ID to add to cart: ");
+                        int productId = scanner.nextInt();
+                        Product product = getProductById(productId);
+                        if (product != null) {
+                            currentUser.getCart().addItem(product);
+                            System.out.println(product.getName() + " added to cart.");
+                        } else {
+                            System.out.println("Invalid product ID.");
+                        }
+                    } else {
+                        System.out.println("Please login first.");
+                    }
+                    break;
+                case 5:
+                    if (currentUser != null) {
+                        displayCart(currentUser.getCart());
+                    } else {
+                        System.out.println("Please login first.");
+                    }
+                    break;
+                case 6:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please enter a number between 1 and 6.");
+            }
+        }
+        scanner.close();
+        System.out.println("Thank you for visiting!");
+    }
+
+    private static User login(String username, String password) {
+        for (User user : users) {
+            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+                System.out.println("Login successful!");
+                return user;
+            }
+        }
+        System.out.println("Invalid username or password!");
+        return null;
+    }
+
+    private static void displayProducts() {
+        System.out.println("Available products:");
+        for (Product product : products) {
+            System.out.println(product.getId() + ". " + product.getName() + " - $" + product.getPrice());
+        }
+    }
+
+    private static Product getProductById(int id) {
+        for (Product product : products) {
+            if (product.getId() == id) {
+                return product;
+            }
+        }
+        return null;
+    }
+
+    private static void displayCart(ShoppingCart cart) {
+        List<Product> items = cart.getItems();
+        if (items.isEmpty()) {
+            System.out.println("Your cart is empty.");
+        } else {
+            System.out.println("Your cart:");
+            for (Product item : items) {
+                System.out.println("- " + item.getName() + " - $" + item.getPrice());
+            }
+            System.out.println("Total: $" + cart.calculateTotal());
+        }
+    }
+}
